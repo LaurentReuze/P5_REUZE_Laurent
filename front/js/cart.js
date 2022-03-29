@@ -1,7 +1,7 @@
 // ------------------- Partie déclaration des constantes et variable ---------------------
-
 const tableauAddition = [];
 const tabQuantite = [];
+const panier = [];
 const objNavigateur = localStorage.getItem("Panier");
 const tableauParse = JSON.parse(objNavigateur);
 const prenom = document.getElementById("firstName");
@@ -115,6 +115,16 @@ ecouteChamp(email);
 
 // ------------------- Partie Modification de la commande ---------------------
 
+// ------------------ Recupération du panier pour modification ------------------------
+
+function recupConvParse() {
+  // Je recupère le panier qui est dans le navigateur
+  const objNavigateur = localStorage.getItem("Panier");
+  // Je parse l'objet du navigateur
+  const tableauParse = JSON.parse(objNavigateur);
+  return tableauParse;
+}
+
 // ------------------ Bouton Supprimé ---------------------------
 
 function Bouton() {
@@ -133,11 +143,23 @@ function Bouton() {
       // Récupération des deux attributs "data-id" et "data-color"
       const referenceProduit = parent.getAttribute("data-id");
       const couleurProduit = parent.getAttribute("data-color");
-      //
       console.log(referenceProduit);
       console.log(couleurProduit);
+      // Je recupère le panier existant
+      const tableauParse = recupConvParse();
+      console.log(tableauParse);
+      // Je recherche l'index de l'objet à supprimer
+      const numeroIndex = tableauParse.findIndex(
+        (el) =>
+          el.referenceProduit === referenceProduit &&
+          el.couleurProduit === couleurProduit
+      );
+      // Je supprime l'objet du tableau
+      tableauParse.splice(numeroIndex, 1);
+
+      console.log(tableauParse);
       // Je supprime l'article
-      // parent.remove();
+      parent.remove();
     });
   }
 }
