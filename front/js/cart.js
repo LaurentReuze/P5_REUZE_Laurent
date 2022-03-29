@@ -125,6 +125,16 @@ function recupConvParse() {
   return tableauParse;
 }
 
+function convertionStringEnvoi(tableauParse) {
+  // Je converti le tableau récapitulitif au format JSON
+  tableauString = JSON.stringify(tableauParse);
+  console.log(tableauParse);
+  // J'éfface l'item "Panier" du localStorage
+  localStorage.removeItem("Panier");
+  // Je stocke le tableau dans le navigateur
+  localStorage.setItem("Panier", tableauString);
+}
+
 // ------------------ Bouton Supprimé ---------------------------
 
 function Bouton() {
@@ -156,8 +166,10 @@ function Bouton() {
       );
       // Je supprime l'objet du tableau
       tableauParse.splice(numeroIndex, 1);
-
       console.log(tableauParse);
+      // Je stringity le tableau et je le renvoi dans le localStorage
+      convertionStringEnvoi(tableauParse);
+
       // Je supprime l'article
       parent.remove();
     });
