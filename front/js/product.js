@@ -3,7 +3,6 @@ const article = {
   referenceProduit: null,
   couleurProduit: null,
   quantiteProduit: null,
-  prix: null,
 };
 const select = document.getElementById("colors");
 const quantite = document.getElementById("quantity");
@@ -48,8 +47,6 @@ fetch(`http://localhost:3000/api/products/${article.referenceProduit}`)
   .catch(function (err) {
     window.alert("Serveur déconnecté");
   });
-
-article.prix = document.getElementById("price").textContent;
 
 select.addEventListener("change", (event) => {
   document.querySelector(".result");
@@ -103,7 +100,6 @@ function recuperationConvertionParse(params) {
 bouton.addEventListener("click", () => {
   // Je controle la couleur et la quantite
   const controle = controleCouleurQuantite();
-  article.prix = document.getElementById("price").textContent;
   // Je vérifie si il y a eu une erreur lors du controle
   if (controle == false) {
     const controleNavigateur = localStorage.getItem("Panier");

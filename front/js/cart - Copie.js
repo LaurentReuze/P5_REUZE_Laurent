@@ -11,7 +11,6 @@ const ville = document.getElementById("city");
 const email = document.getElementById("email");
 const commander = document.getElementById("order");
 let somme = 0;
-let quantiteTotal = 0;
 const contact = {
   firstName: null,
   lastName: null,
@@ -57,11 +56,6 @@ for (let index = 0; index < tableauParse.length; index++) {
     </div>
   </article>`;
 
-      let convPrix = parseInt(datas.price, 10);
-      let convQuantite = parseInt(element.quantiteProduit, 10);
-      let totalPrix = convPrix * convQuantite;
-      tabTotal.push(totalPrix);
-      tabQuantite.push(convQuantite);
       Bouton();
       modification();
     })
@@ -71,26 +65,18 @@ for (let index = 0; index < tableauParse.length; index++) {
 }
 // ------------------- Partie affichage de la quantite total et Prix total ---------------------
 
-// --------------------- Affichage du total --------------------------
-setTimeout(function total() {
-  console.log(tabTotal);
-  for (let index = 0; index < tabTotal.length; index++) {
-    somme += tabTotal[index];
-  }
-  document.getElementById("totalPrice").innerText = somme;
-  console.log(somme);
-}, 200);
-// --------------------- Affichage de la quantité total d'articles -------------
+console.log(tabTotal);
+for (let index = 0; index < tabTotal.length; index++) {
+  somme += tabTotal[index];
+}
 
-setTimeout(function totalQuantite() {
-  console.log(tabQuantite);
-  for (let index = 0; index < tabQuantite.length; index++) {
-    quantiteTotal += tabQuantite[index];
-  }
-  document.getElementById("totalQuantity").innerText = quantiteTotal;
-}, 200);
+// console.log(document.getElementById("totalPrice").innerText);
+
+document.getElementById("totalPrice").innerText = somme;
 
 // // J'addition les quantités d'articles et je les affiche
+
+document.getElementById("totalQuantity").innerText = somme;
 
 // ------------------- Partie écoute des champs du formulaire ---------------------
 function ecouteChamp(champ) {
