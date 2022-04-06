@@ -2,6 +2,7 @@
 const tabTotal = [];
 const tabQuantite = [];
 const tabPanier = [];
+const products = [];
 const objNavigateur = localStorage.getItem("Panier");
 const tableauParse = JSON.parse(objNavigateur);
 const prenom = document.getElementById("firstName");
@@ -64,41 +65,46 @@ for (let index = 0; index < tableauParse.length; index++) {
       tabQuantite.push(convQuantite);
       Bouton();
       modification();
+      location.reload;
+      // console.log(element.referenceProduit);
+      // Rajout des références produits dans le tableau Products
+      // console.log(products);
+      products.push(element.referenceProduit);
     })
     .catch(function (err) {
-      // window.alert("Serveur déconnecté");
+      window.alert("Serveur déconnecté");
     });
 }
 // ------------------- Partie affichage de la quantite total et Prix total ---------------------
 
 // --------------------- Affichage du total --------------------------
 setTimeout(function total() {
-  console.log(tabTotal);
+  // console.log(tabTotal);
   for (let index = 0; index < tabTotal.length; index++) {
     somme += tabTotal[index];
   }
   document.getElementById("totalPrice").innerText = somme;
-  console.log(somme);
-}, 200);
+  // console.log(somme);
+}, 500);
 // --------------------- Affichage de la quantité total d'articles -------------
 
 setTimeout(function totalQuantite() {
-  console.log(tabQuantite);
+  // console.log(tabQuantite);
   for (let index = 0; index < tabQuantite.length; index++) {
     quantiteTotal += tabQuantite[index];
   }
   document.getElementById("totalQuantity").innerText = quantiteTotal;
-}, 200);
+}, 500);
 
 // // J'addition les quantités d'articles et je les affiche
 
 // ------------------- Partie écoute des champs du formulaire ---------------------
 function ecouteChamp(champ) {
   champ.addEventListener("change", (event) => {
-    console.log("J'ai un changement sur " + event.target.id);
+    // console.log("J'ai un changement sur " + event.target.id);
     contact[event.target.id] = event.target.value;
-    console.log("Nouvel objet contact : ");
-    console.log(contact);
+    // console.log("Nouvel objet contact : ");
+    // console.log(contact);
   });
 }
 
@@ -133,16 +139,13 @@ function convertionStringEnvoi(tableauParse) {
   localStorage.removeItem("Panier");
   // Je stocke le tableau dans le navigateur
   localStorage.setItem("Panier", tableauString);
+  location.reload();
 }
 
 // ------------------ Bouton Supprimé ---------------------------
 
 function Bouton() {
   const nodeList = document.querySelectorAll(`#deleteItem`);
-  // const nodeList = document.querySelectorAll(
-  //   `article[data-id=${referenceProduit}] > .deleteItem]`
-  // );
-  // console.log(nodeList.id);
   tabDeleted = Array.prototype.slice.call(nodeList);
 
   for (let index = 0; index < tabDeleted.length; index++) {
@@ -188,11 +191,40 @@ function modification() {
     element.addEventListener("change", (event) => {
       // Code a faire pour la modification de la quantité
       console.log("Quantité modifiée");
+      // Récupération du parent de l'évènement
+      const parentInput = element.closest(`input`);
+      console.log(parentInput);
+      // Récupération de la quantité modifiée
+      const valueModif = parentInput.value;
+      const convValue = parseInt(valueModif, 10);
+      console.log(typeof convValue);
+      // Récupération du parent article de l'évèvement
+      const parentArticle = element.closest(`article`);
+      console.log(parentArticle);
+      // Récupération des deux attributs "data-id" et "data-color"
+      const referenceProduit = parentArticle.getAttribute("data-id");
+      const couleurProduit = parentArticle.getAttribute("data-color");
+      console.log(referenceProduit);
+      console.log(couleurProduit);
+      // Je recupère le panier existant
+      const tableauParse = recupConvParse();
+      console.log(tableauParse);
+      // Je recherche l'index de l'objet à supprimer
+      const numeroIndex = tableauParse.findIndex(
+        (el) =>
+          el.referenceProduit === referenceProduit &&
+          el.couleurProduit === couleurProduit
+      );
+      console.log(numeroIndex);
+      tableauParse[numeroIndex].quantiteProduit = convValue;
+      console.log(tableauParse);
+      convertionStringEnvoi(tableauParse);
     });
   }
 }
 
 // ------------------- Partie Commande du formulaire ---------------------
+function envoiOrder() {}
 
 function checkEmail(email) {
   const verification =
@@ -200,8 +232,13 @@ function checkEmail(email) {
   return verification.test(email);
 }
 
+// Je recupère le bouton Commander
+const btnCommander = document.getElementById("order");
+// console.log(btnCommander);
+
 commander.addEventListener("click", (event) => {
   event.preventDefault();
+
   if (checkEmail(contact.email)) {
     localStorage.setItem("contact", JSON.stringify(contact));
   } else {
@@ -209,5 +246,34 @@ commander.addEventListener("click", (event) => {
       "Le mail saisie ne semble pas être valide. Merci de saisir une adresse mail valide."
     );
   }
-  console.log(contact);
+  // Vérification des différentes informations saisie par l'utilisateur sauf l'adresse
+
+  // Je recupère le panier qui est dans le navigateur
+
+  // console.log(products);
+
+  // console.log(contact);
+
+  let bodyToSend = {
+    contact,
+    products,
+  };
+
+  fetch("http://localhost:3000/api/products/order", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(bodyToSend),
+  })
+    .then(function (res) {
+      if (res.ok) {
+        return res.json();
+      }
+    })
+    .then((data) => {
+      console.log(data);
+      console.log(data.orderId);
+      window.location.href = `./confirmation.html?orderId=${data.orderId}`;
+    });
 });
