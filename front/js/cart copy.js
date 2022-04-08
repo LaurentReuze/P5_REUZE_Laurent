@@ -1,6 +1,7 @@
 // ------------------- Partie déclaration des constantes et variable ---------------------
-const tabRecap = [];
+const tabTotal = [];
 const tabQuantite = [];
+const tabPanier = [];
 const products = [];
 const objNavigateur = localStorage.getItem("Panier");
 const tableauParse = JSON.parse(objNavigateur);
@@ -12,7 +13,6 @@ const email = document.getElementById("email");
 const commander = document.getElementById("order");
 let somme = 0;
 let quantiteTotal = 0;
-let prixTotal = 0;
 const contact = {
   firstName: null,
   lastName: null,
@@ -23,80 +23,80 @@ const contact = {
 
 // ------------------- Partie affichage des articles  ---------------------
 
-// console.log(tableauParse);
-const article = {};
-let total;
-// ------------------- Affichage des totaux ------------------------
-
-console.log("gestion du tableau");
-
 for (let index = 0; index < tableauParse.length; index++) {
-  // -------------- Récupération de la référence de l'article ------------
-  article.refArticle = tableauParse[index].referenceProduit;
-  // console.log(article.refArticle);
-  async function retourApi(refArticle) {
-    try {
-      const reponse = await fetch(
-        `http://localhost:3000/api/products/${refArticle}`
-      );
-      const data = await reponse.json();
-      // ----------------- Récupération de la couleur de l'article --------------
-      article.couleurArticle = tableauParse[index].couleurProduit;
-      // console.log(article.couleurArticle);
-      // ---------------- récupération de la quantité de l'article --------------
-      article.quantiteArticle = tableauParse[index].quantiteProduit;
-      // console.log(article.quantiteArticle);
-      // ------------- Récupération du prix des articles ---------------
-      tableauParse[index].prixProduit = data.price;
-      // ------------- Affichage des articles -----------------
+  const element = tableauParse[index];
+
+  // --------------------------------
+
+  fetch(`http://localhost:3000/api/products/${element.referenceProduit}`)
+    .then(function (res) {
+      if (res.ok) {
+        return res.json();
+      }
+    })
+    .then(function (datas) {
       const item = document.getElementById("cart__items");
-      item.innerHTML += `<article class="cart__item" data-id=${article.refArticle} data-color=${article.couleurArticle}>
-      <div class="cart__item__img">
-        <img src="${data.imageUrl}" alt=${data.altTxt}>
+      item.innerHTML += `<article class="cart__item" data-id=${element.referenceProduit} data-color=${element.couleurProduit}>
+    <div class="cart__item__img">
+      <img src="${datas.imageUrl}" alt=${datas.altTxt}>
+    </div>
+    <div class="cart__item__content">
+      <div class="cart__item__content__description">
+        <h2>${datas.name}</h2>
+        <p>${element.couleurProduit}</p>
+        <p>${datas.price} €</p>
       </div>
-      <div class="cart__item__content">
-        <div class="cart__item__content__description">
-          <h2>${data.name}</h2>
-          <p>${article.couleurArticle}</p>
-          <p>${data.price} €</p>
+      <div class="cart__item__content__settings">
+        <div class="cart__item__content__settings__quantity">
+          <p>Qté : </p>
+          <input id=quantiteArticle type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${element.quantiteProduit}">
         </div>
-        <div class="cart__item__content__settings">
-          <div class="cart__item__content__settings__quantity">
-            <p>Qté : </p>
-            <input id=quantiteArticle type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${article.quantiteArticle}">
-          </div>
-          <div class="cart__item__content__settings__delete">
-            <p class="deleteItem" id="deleteItem" >Supprimer</p>
-          </div>
+        <div class="cart__item__content__settings__delete">
+          <p class="deleteItem" id="deleteItem" >Supprimer</p>
         </div>
       </div>
-    </article>`;
+    </div>
+  </article>`;
 
-      async function affichageTotal(params) {}
-    } catch (error) {
-      alert("Serveur non lancé. Merci de faire le nécéssaire");
-    }
-  }
-  retourApi(article.refArticle);
-
-  let totalPrix = 0;
-  let totalQuantite = 0;
-  function affichageTotal(tableau) {
-    console.log(tableau);
-    for (let index = 0; index < tableau.length; index++) {
-      const quantite = tableau[index].quantiteProduit;
-      const prix = tableau[index].prixProduit;
-      console.log(prix);
-      totalQuantite += quantite;
-      totalPrix += prix;
-    }
-    console.log(totalQuantite);
-    console.log(totalPrix);
-  }
-
-  affichageTotal(tableauParse);
+      let convPrix = parseInt(datas.price, 10);
+      let convQuantite = parseInt(element.quantiteProduit, 10);
+      let totalPrix = convPrix * convQuantite;
+      tabTotal.push(totalPrix);
+      tabQuantite.push(convQuantite);
+      Bouton();
+      modification();
+      location.reload;
+      // console.log(element.referenceProduit);
+      // Rajout des références produits dans le tableau Products
+      // console.log(products);
+      products.push(element.referenceProduit);
+    })
+    .catch(function (err) {
+      window.alert("Serveur déconnecté");
+    });
 }
-// ------------- Affichage des totaux ---------------------
+// ------------------- Partie affichage de la quantite total et Prix total ---------------------
+
+// --------------------- Affichage du total --------------------------
+setTimeout(function total() {
+  // console.log(tabTotal);
+  for (let index = 0; index < tabTotal.length; index++) {
+    somme += tabTotal[index];
+  }
+  document.getElementById("totalPrice").innerText = somme;
+  // console.log(somme);
+}, 500);
+// --------------------- Affichage de la quantité total d'articles -------------
+
+setTimeout(function totalQuantite() {
+  // console.log(tabQuantite);
+  for (let index = 0; index < tabQuantite.length; index++) {
+    quantiteTotal += tabQuantite[index];
+  }
+  document.getElementById("totalQuantity").innerText = quantiteTotal;
+}, 500);
+
+// // J'addition les quantités d'articles et je les affiche
 
 // ------------------- Partie écoute des champs du formulaire ---------------------
 function ecouteChamp(champ) {
