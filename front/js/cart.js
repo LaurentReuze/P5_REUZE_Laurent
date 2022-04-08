@@ -78,25 +78,24 @@ for (let index = 0; index < tableauParse.length; index++) {
     }
   }
   retourApi(article.refArticle);
-
-  let totalPrix = 0;
-  let totalQuantite = 0;
-  function affichageTotal(tableau) {
-    console.log(tableau);
-    for (let index = 0; index < tableau.length; index++) {
-      const quantite = tableau[index].quantiteProduit;
-      const prix = tableau[index].prixProduit;
-      console.log(prix);
-      totalQuantite += quantite;
-      totalPrix += prix;
-    }
-    console.log(totalQuantite);
-    console.log(totalPrix);
-  }
-
-  affichageTotal(tableauParse);
 }
 // ------------- Affichage des totaux ---------------------
+let totalPrix = 0;
+let totalQuantite = 0;
+function affichageTotal(tableau) {
+  console.log(tableau);
+  for (let index = 0; index < tableau.length; index++) {
+    const quantite = tableau[index].quantiteProduit;
+    const prix = tableau[index].prixProduit;
+    console.log(prix);
+    totalQuantite += quantite;
+    totalPrix += prix;
+  }
+  console.log(totalQuantite);
+  console.log(totalPrix);
+}
+
+affichageTotal(tableauParse);
 
 // ------------------- Partie écoute des champs du formulaire ---------------------
 function ecouteChamp(champ) {
