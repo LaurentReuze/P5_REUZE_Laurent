@@ -28,74 +28,91 @@ const article = {};
 let total;
 // ------------------- Affichage des totaux ------------------------
 
-console.log("gestion du tableau");
-
-for (let index = 0; index < tableauParse.length; index++) {
-  // -------------- Récupération de la référence de l'article ------------
-  article.refArticle = tableauParse[index].referenceProduit;
-  // console.log(article.refArticle);
-  async function retourApi(refArticle) {
+// console.log("gestion du tableau");
+async function retourApi(article) {
+  try {
+    const reponse = await fetch(
+      `http://localhost:3000/api/products/${article.referenceProduit}`
+    );
+    const data = await reponse.json();
+    // console.log(data);
+    // ----------------- Récupération de la couleur de l'article --------------
+    article.couleurArticle = article.couleurProduit;
+    // console.log(article.couleurArticle);
+    // ---------------- récupération de la quantité de l'article --------------
+    article.quantiteArticle = article.quantiteProduit;
+    // console.log(article.quantiteArticle);
+    // ------------- Récupération du prix des articles ---------------
+    article.prixProduit = data.price;
+    // ------------- Affichage des articles -----------------
+    const item = document.getElementById("cart__items");
+    item.innerHTML += `<article class="cart__item" data-id=${data._id} data-color=${article.couleurArticle}>
+    <div class="cart__item__img">
+      <img src="${data.imageUrl}" alt=${data.altTxt}>
+    </div>
+    <div class="cart__item__content">
+      <div class="cart__item__content__description">
+        <h2>${data.name}</h2>
+        <p>${article.couleurArticle}</p>
+        <p>${data.price} €</p>
+      </div>
+      <div class="cart__item__content__settings">
+        <div class="cart__item__content__settings__quantity">
+          <p>Qté : </p>
+          <input id=quantiteArticle type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${article.quantiteArticle}">
+        </div>
+        <div class="cart__item__content__settings__delete">
+          <p class="deleteItem" id="deleteItem" >Supprimer</p>
+        </div>
+      </div>
+    </div>
+  </article>`;
+    // Ecoute du champs Qté et du bouton supprimé
+    Bouton();
+    modification();
+  } catch (error) {
+    console.log(error);
+    console.log("Serveur non lancé");
+  }
+}
+async function gestionDesTotaux() {
+  function affichageTotaux(tableau) {
     try {
-      const reponse = await fetch(
-        `http://localhost:3000/api/products/${refArticle}`
-      );
-      const data = await reponse.json();
-      // ----------------- Récupération de la couleur de l'article --------------
-      article.couleurArticle = tableauParse[index].couleurProduit;
-      // console.log(article.couleurArticle);
-      // ---------------- récupération de la quantité de l'article --------------
-      article.quantiteArticle = tableauParse[index].quantiteProduit;
-      // console.log(article.quantiteArticle);
-      // ------------- Récupération du prix des articles ---------------
-      tableauParse[index].prixProduit = data.price;
-      // ------------- Affichage des articles -----------------
-      const item = document.getElementById("cart__items");
-      item.innerHTML += `<article class="cart__item" data-id=${article.refArticle} data-color=${article.couleurArticle}>
-      <div class="cart__item__img">
-        <img src="${data.imageUrl}" alt=${data.altTxt}>
-      </div>
-      <div class="cart__item__content">
-        <div class="cart__item__content__description">
-          <h2>${data.name}</h2>
-          <p>${article.couleurArticle}</p>
-          <p>${data.price} €</p>
-        </div>
-        <div class="cart__item__content__settings">
-          <div class="cart__item__content__settings__quantity">
-            <p>Qté : </p>
-            <input id=quantiteArticle type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${article.quantiteArticle}">
-          </div>
-          <div class="cart__item__content__settings__delete">
-            <p class="deleteItem" id="deleteItem" >Supprimer</p>
-          </div>
-        </div>
-      </div>
-    </article>`;
-
-      async function affichageTotal(params) {}
+      // console.log(tableau);
+      for (let index = 0; index < tableau.length; index++) {
+        const quantite = tableau[index].quantiteProduit;
+        const prix = tableau[index].prixProduit;
+        // console.log(prix);
+        quantiteTotal += quantite;
+        prixTotal += quantite * prix;
+      }
     } catch (error) {
-      alert("Serveur non lancé. Merci de faire le nécéssaire");
+      console.log(error);
+      console.log("Pas eu de récupération de l'API");
     }
+    // ------------- Affichage des totaux ---------------------
+    // console.log(quantiteTotal);
+    // console.log(prixTotal);
+    document.getElementById("totalPrice").innerText = prixTotal;
+    document.getElementById("totalQuantity").innerText = quantiteTotal;
   }
-  retourApi(article.refArticle);
+
+  affichageTotaux(tableauParse);
+  return tableauParse; // return de fonction
 }
-// ------------- Affichage des totaux ---------------------
-let totalPrix = 0;
-let totalQuantite = 0;
-function affichageTotal(tableau) {
-  console.log(tableau);
-  for (let index = 0; index < tableau.length; index++) {
-    const quantite = tableau[index].quantiteProduit;
-    const prix = tableau[index].prixProduit;
-    console.log(prix);
-    totalQuantite += quantite;
-    totalPrix += prix;
+async function parcourTableauLocalStorage() {
+  for (let index = 0; index < tableauParse.length; index++) {
+    // -------------- Récupération de la référence de l'article ------------
+    let article = tableauParse[index];
+    // console.log(article.refArticle);
+    await retourApi(article);
   }
-  console.log(totalQuantite);
-  console.log(totalPrix);
+  // ---------------- Exemple de retour fonction -------------------------
+  let tableau = await gestionDesTotaux();
+  // console.log(tableau);
 }
 
-affichageTotal(tableauParse);
+parcourTableauLocalStorage();
 
 // ------------------- Partie écoute des champs du formulaire ---------------------
 function ecouteChamp(champ) {
